@@ -3,9 +3,10 @@ version: '3'
 services:
   
   postgres:
-    build:
-      context: ./Chatbot-Flask-Backend/
-      dockerfile: Dockerfile.postgres
+    #build:
+    #  context: ./Chatbot-Flask-Backend/
+    #  dockerfile: Dockerfile.postgres
+    image: aharoud/esj-postgredb:1.0.0
     container_name: postgresDB
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -19,6 +20,7 @@ services:
   
   redis:
     image: redis:latest
+    container_name: redisDB
     ports:
       - "6379:6379"
     volumes:
@@ -54,7 +56,8 @@ services:
       - esj-backend
 
   esj-chatbot:
-    build: ./Chatbot-Flask-Backend
+    #build: ./Chatbot-Flask-Backend
+    image: aharoud/esj-chatbot:1.0.0
     container_name: esj-chatbot
     ports:
       - "5000:5000"

@@ -1,52 +1,79 @@
-# ESJ Source Code
+# **ESJ Source Code**
 
-Follow these steps to run the application.
+## **Running the Application Locally (Without HTTPS)**
 
-**Note:** You can use Git Bash or any terminal for the following commands.
+To run the application on your localhost without HTTPS, follow these steps:
 
-## 1) Generate Certificates for Frontend (nginx)
-   - Find and note your local IP address, such as `192.168.0.3`.
-   - Create an empty `ssl` folder under the project directory.
-   - Run the following command to generate SSL certificates for the frontend (nginx):
+1. Open your terminal in the project directory.  
+2. Run the following command:
    ```bash
-   mkdir ssl && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ssl/private_key.pem -out ssl/certificate.pem -subj "//C=US//ST=California//L=San Francisco//O=MyOrganization//OU=MyDepartment//CN=<YOUR_LOCAL_IP>"
+   docker compose up -d
    ```
 
+---
+
+## **Running the Application with HTTPS**
+
+To enable **HTTPS**, follow the steps below.
+
+### **1) Generate Certificates for the Frontend (nginx)**
+
+1. Find your **local IP address** (e.g., `192.168.0.3`).
+2. Create an `ssl` folder in the project directory:
+   ```bash
+   mkdir ssl
+   ```
+3. Generate SSL certificates for the frontend:
+   ```bash
+   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+   -keyout ssl/private_key.pem -out ssl/certificate.pem \
+   -subj "/C=US/ST=California/L=San Francisco/O=MyOrganization/OU=MyDepartment/CN=<YOUR_LOCAL_IP>"
+   ```
    Replace `<YOUR_LOCAL_IP>` with your actual IP address.
 
-## 2) Update nginx.conf
+---
 
-   - In the `nginx` folder, open the `nginx.conf` file.
-   - Replace all instances of `<YOUR_LOCAL_IP>` with your local IP address (the same IP used in Step 1).
+### **2) Update nginx Configuration**
 
-## 3) Generate Certificate for Backend
+1. In the **nginx** folder, open the `nginx.conf` file.  
+2. Replace all instances of `<YOUR_LOCAL_IP>` with your actual local IP address.
 
-   Run the following command to generate a certificate for the backend:
+---
 
+### **3) Generate a Certificate for the Backend**
+
+1. Create a keystore using the following command:
    ```bash
-   keytool -genkeypair -alias myAlias -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore ./esj-backend/src/main/resources/keystore.p12 -validity 3650 -dname "CN=<YOUR_LOCAL_IP>, OU=MyOrg, O=MyCompany, L=MyCity, ST=MyState, C=US"
+   keytool -genkeypair -alias myAlias -keyalg RSA -keysize 2048 \
+   -storetype PKCS12 -keystore ./esj-backend/src/main/resources/keystore.p12 \
+   -validity 3650 -dname "CN=<YOUR_LOCAL_IP>, OU=MyOrg, O=MyCompany, L=MyCity, ST=MyState, C=US"
    ```
-
    - Replace `<YOUR_LOCAL_IP>` with your actual IP address.
-   - Use `123456789` as the password when prompted.
+   - Use **123456789** as the password when prompted.
 
-   Next, export the certificate as a `.crt` file by running this command:
-
-   ```
-   keytool -export -alias myAlias -keystore ./esj-backend/src/main/resources/keystore.p12 -file backend-cert.crt
-   ```
-
-## 4) Run the Application
-
-   Now, you can build and run the application using Docker Compose:
-
+2. Export the certificate as a `.crt` file:
    ```bash
-   IP_ADDRESS=<YOUR_LOCAL_IP> docker compose up --build -d
+   keytool -export -alias myAlias \
+   -keystore ./esj-backend/src/main/resources/keystore.p12 \
+   -file backend-cert.crt
    ```
 
-   Replace `<YOUR_LOCAL_IP>` with your actual IP address.
+---
 
-## 5) Accessing the Application from Other Computers
+### **4) Run the Application with HTTPS**
 
-   To allow other computers to access the application:
-   - Export the `backend-cert.crt` file and install it as a trusted certificate on those computers.
+Use the following command to build and run the application with HTTPS:
+
+```bash
+IP_ADDRESS=<YOUR_LOCAL_IP> docker compose -f docker-compose-v2.yml up --build -d
+```
+Replace `<YOUR_LOCAL_IP>` with your actual IP address.
+
+---
+
+### **5) Allow Access from Other Computers**
+
+If other computers need access to the application:  
+
+1. Export the `backend-cert.crt` file (from Step 3).  
+2. Install the `.crt` file as a **trusted certificate** on those computers.
